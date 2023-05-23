@@ -12,9 +12,9 @@ const (
 type User struct {
 	gorm.Model
 	Role      UserRole
-	PartnerID uint
+	PartnerID uint    `gorm:"unique"`
 	Partner   Partner `gorm:"foreignKey:PartnerID"`
-	Username  string
+	Username  string  `gorm:"unique"`
 	Password  string
 }
 

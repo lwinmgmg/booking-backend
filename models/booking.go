@@ -1,15 +1,16 @@
 package models
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 )
 
 type Booking struct {
 	gorm.Model
-	PartnerID   string
-	BookingTime time.Time
+	PartnerID    uint
+	Partner      Partner `gorm:"foreignKey:PartnerID"`
+	UserID       uint
+	User         User `gorm:"foreignKey:UserID"`
+	BookingLines []BookingLine
 }
 
 func (user Booking) TableName() string {

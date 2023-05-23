@@ -1,6 +1,8 @@
 package schemas
 
-import "errors"
+import (
+	"errors"
+)
 
 type BookingLineCreate struct {
 	ProductID *uint `json:"product_id"`

@@ -25,6 +25,7 @@ func (apiRouter *ApiRouter) Register() error {
 
 	bookingController := &controllers.BookingController{}
 	apiRouter.Router.POST("/bookings", bookingController.Book)
+	apiRouter.Router.GET("/report/bookings", bookingController.BookingDetailReport)
 	return nil
 }
 

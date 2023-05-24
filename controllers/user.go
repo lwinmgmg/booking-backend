@@ -16,7 +16,7 @@ type UserController struct {
 
 func (userApi *UserController) CreateUser(c *gin.Context) {
 	userCreate := &schemas.UserCreate{}
-	userRole := models.ADMIN
+	userRole := models.PORTAL
 	if err := c.ShouldBind(userCreate); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, map[string]any{
 			"success": false,

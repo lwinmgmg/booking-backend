@@ -17,7 +17,10 @@ type BookingController struct {
 }
 
 func (bc *BookingController) Book(c *gin.Context) {
-	userID := 1
+	userId, err := getUserId(c)
+	if err != nil {
+		return
+	}
 	bookingCreate := &schemas.BookingCreate{}
 	if err := c.ShouldBind(bookingCreate); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, map[string]any{
@@ -28,7 +31,7 @@ func (bc *BookingController) Book(c *gin.Context) {
 	}
 	booking := &models.Booking{
 		PartnerID: *bookingCreate.PartnerID,
-		UserID:    uint(userID),
+		UserID:    userId,
 	}
 	if err := db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(booking).Error; err != nil {
@@ -62,21 +65,20 @@ func (bc *BookingController) Book(c *gin.Context) {
 }
 
 func (bc *BookingController) BookingDetailReport(c *gin.Context) {
-	partner_id := c.Query("partner_id")
-	if partner_id == "" {
-		c.JSON(http.StatusUnprocessableEntity, map[string]any{
-			"success": false,
-			"message": "partner_id can't be empty",
-		})
+	_, err := getUserId(c)
+	if err != nil {
+		return
 	}
+	partner_id := c.Query("partner_id")
 	dateStr := c.Query("date")
 	if dateStr == "" {
 		c.JSON(http.StatusUnprocessableEntity, map[string]any{
 			"success": false,
 			"message": "date can't be empty",
 		})
+		return
 	}
-	_, err := time.Parse("2006-01-02", dateStr)
+	_, err = time.Parse("2006-01-02", dateStr)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, map[string]any{
 			"success": false,
@@ -85,12 +87,22 @@ func (bc *BookingController) BookingDetailReport(c *gin.Context) {
 		return
 	}
 	data := make([]map[string]any, 0)
-	db.Raw(fmt.Sprintf(`
-	SELECT * FROM booking_line AS bl
-	INNER JOIN booking bk ON bk.id=bl.booking_id
-	WHERE bk.created_at::DATE = ? AND bk.partner_id = ?
-	`), dateStr, partner_id).Scan(&data)
-	fmt.Println(data)
+	if partner_id == "" {
+		db.Raw(fmt.Sprintf(`
+		SELECT * FROM booking_line AS bl
+		INNER JOIN booking bk ON bk.id=bl.booking_id
+		LEFT JOIN partner pt ON pt.id=bk.partner_id
+		WHERE bk.created_at::DATE = ?
+		`), dateStr).Scan(&data)
+	} else {
+		db.Raw(fmt.Sprintf(`
+		SELECT * FROM booking_line AS bl
+		INNER JOIN booking bk ON bk.id=bl.booking_id
+		LEFT JOIN partner pt ON pt.id=bk.partner_id
+		WHERE bk.created_at::DATE = ? AND bk.partner_id = ?
+		`), dateStr, partner_id).Scan(&data)
+	}
+
 	records := [][]string{
 		{"first_name", "last_name", "occupation"},
 		{"John", "Doe", "gardener"},

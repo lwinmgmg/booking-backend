@@ -62,3 +62,9 @@ func (userLogin *UserLogin) Validate() error {
 	}
 	return nil
 }
+
+type UserLoginResponse struct {
+	ID       uint   `json:"id"`
+	Username string `json:"username"`
+	Role     string `json:"role"`
+}

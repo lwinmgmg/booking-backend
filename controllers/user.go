@@ -88,7 +88,6 @@ func (userController *UserController) Login(c *gin.Context) {
 		})
 		return
 	}
-	db.Find(&(user.Partner), user.PartnerID)
 	if user.Password != *userLogin.Password {
 		c.JSON(http.StatusUnauthorized, map[string]any{
 			"success": false,
@@ -97,7 +96,11 @@ func (userController *UserController) Login(c *gin.Context) {
 		return
 	}
 	user.Password = ""
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, schemas.UserLoginResponse{
+		Username: user.Username,
+		ID:       user.ID,
+		Role:     string(user.Role),
+	})
 }
 
 func (userApi *UserController) DeleteUser(c *gin.Context) {

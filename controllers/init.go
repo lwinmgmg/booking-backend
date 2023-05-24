@@ -14,7 +14,7 @@ var (
 )
 
 const (
-	UserHeader = "user_id"
+	UserHeader = "Authorization"
 )
 
 type Controller struct {

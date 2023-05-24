@@ -10,6 +10,7 @@ type Product struct {
 	SalePrice float64
 	UnitID    uint
 	Unit      Unit `gorm:"foreignKey:UnitID"`
+	ImageUrl  string
 }
 
 func (user Product) TableName() string {
